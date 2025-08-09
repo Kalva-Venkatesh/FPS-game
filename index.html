@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Strike</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            cursor: pointer;
+        }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+        }
+        #crosshair::before, #crosshair::after {
+            content: '';
+            position: absolute;
+            background: #00ffff;
+            box-shadow: 0 0 5px #00ffff;
+        }
+        #crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 9px;
+            top: 0;
+        }
+        #crosshair::after {
+            width: 20px;
+            height: 2px;
+            left: 0;
+            top: 9px;
+        }
+        .hud-element {
+            position: absolute;
+            color: white;
+            font-size: 20px;
+            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+            -webkit-font-smoothing: antialiased;
+        }
+        #hud {
+            bottom: 20px;
+            left: 20px;
+        }
+        #wave-info {
+            top: 20px;
+            left: 20px;
+        }
+        #reload-indicator {
+            top: 55%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff4d4d;
+            font-size: 24px;
+            display: none;
+        }
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 20, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            cursor: default;
+        }
+        #start-screen h1 {
+            font-size: 5rem;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            margin-bottom: 20px;
+        }
+         #start-screen p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+        }
+        #start-button {
+            padding: 15px 30px;
+            font-size: 24px;
+            background: transparent;
+            color: white;
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #start-button:hover {
+            background: #00ffff;
+            color: black;
+            box-shadow: 0 0 25px #00ffff;
+        }
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            font-size: 16px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="crosshair"></div>
+        <div id="hud" class="hud-element">
+            Health: <span id="health">100</span> | 
+            Ammo: <span id="ammo">30</span>/<span id="max-ammo">90</span> | 
+            Kills: <span id="kills">0</span>
+        </div>
+        <div id="wave-info" class="hud-element">Wave: <span id="wave">1</span></div>
+        <div id="reload-indicator" class="hud-element">RELOADING...</div>
+        <div id="controls-info">
+            Move: Arrow Keys/WASD<br>
+            Shoot: Spacebar<br>
+            Reload: R
+        </div>
+
+        <div id="start-screen">
+            <h1 id="screen-title">NEON STRIKE</h1>
+            <p id="screen-stats"></p>
+            <button id="start-button">START MISSION</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/PointerLockControls.js"></script>
+    <script>
+        // --- DOM Elements ---
+        const gameContainer = document.getElementById('game-container');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const healthUI = document.getElementById('health');
+        const ammoUI = document.getElementById('ammo');
+        const maxAmmoUI = document.getElementById('max-ammo');
+        const killsUI = document.getElementById('kills');
+        const waveUI = document.getElementById('wave');
+        const reloadIndicator = document.getElementById('reload-indicator');
+        const screenTitle = document.getElementById('screen-title');
+        const screenStats = document.getElementById('screen-stats');
+
+        // --- Game Core ---
+        let scene, camera, renderer, controls, clock;
+        let weapon;
+        const enemies = [], ammoBoxes = [], healthPacks = [];
+        const raycaster = new THREE.Raycaster();
+
+        // --- Game State ---
+        let health, ammo, maxAmmo, kills, wave;
+        let isShooting = false, isReloading = false, gameStarted = false;
+        const moveState = { forward: false, backward: false, left: false, right: false };
+        const moveSpeed = 5;
+        
+        // --- Animation Clips ---
+        let shootAnimation, reloadAnimation;
+
+        // --- Initialization ---
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x00001a);
+            scene.fog = new THREE.Fog(0x00001a, 15, 40);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.y = 1.6;
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.setPixelRatio(window.devicePixelRatio);
+            gameContainer.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            directionalLight.position.set(10, 20, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Floor
+            const floorGeometry = new THREE.PlaneGeometry(100, 100);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x08081a, 
+                metalness: 0.2, 
+                roughness: 0.8,
+                side: THREE.DoubleSide
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Create environment
+            createEnvironment();
+
+            // Create weapon
+            createWeapon();
+
+            // Controls
+            controls = new THREE.PointerLockControls(camera, document.body);
+            scene.add(controls.getObject());
+
+            // Clock
+            clock = new THREE.Clock();
+
+            // Event Listeners
+            setupEventListeners();
+            
+            // Start game loop
+            animate();
+        }
+
+        function createEnvironment() {
+            // Create sci-fi corridor walls
+           const loader = new THREE.GLTFLoader();
+loader.load('sci-fi_corridor.glb', (gltf) => {
+    const env = gltf.scene;
+    env.position.set(0, 0, 0);
+    scene.add(env);
+});
+           
+        }
+
+        function createWeapon() {
+            // Create a simple rifle model (replace with your GLTF model)
+            const loader = new THREE.GLTFLoader();
+loader.load('9mm_pistol.glb', (gltf) => {
+    weapon = gltf.scene;
+    // Position and scale the weapon
+    weapon.position.set(0.5, -0.5, -1);
+    weapon.rotation.y = 3*Math.PI/2;
+    weapon.scale.set(0.5, 0.5, 0.5);
+    camera.add(weapon);
+});
+            
+            // Position the rifle in first-p
+        }
+
+        function setupEventListeners() {
+            startButton.addEventListener('click', () => {
+                startScreen.style.display = 'none';
+                controls.lock();
+            });
+
+            controls.addEventListener('lock', () => {
+                if (!gameStarted) {
+                    resetGame();
+                    gameStarted = true;
+                    startWave();
+                }
+            });
+
+            // Spacebar for shooting
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space' && controls.isLocked && gameStarted) {
+                    shoot();
+                }
+                
+                // Movement keys
+                switch(event.code) {
+                    case 'ArrowUp':
+                    case 'KeyW':
+                        moveState.forward = true;
+                        break;
+                    case 'ArrowDown':
+                    case 'KeyS':
+                        moveState.backward = true;
+                        break;
+                    case 'ArrowLeft':
+                    case 'KeyA':
+                        moveState.left = true;
+                        break;
+                    case 'ArrowRight':
+                    case 'KeyD':
+                        moveState.right = true;
+                        break;
+                    case 'KeyR':
+                        if (controls.isLocked) reload();
+                        break;
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                switch(event.code) {
+                    case 'ArrowUp':
+                    case 'KeyW':
+                        moveState.forward = false;
+                        break;
+                    case 'ArrowDown':
+                    case 'KeyS':
+                        moveState.backward = false;
+                        break;
+                    case 'ArrowLeft':
+                    case 'KeyA':
+                        moveState.left = false;
+                        break;
+                    case 'ArrowRight':
+                    case 'KeyD':
+                        moveState.right = false;
+                        break;
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        
+        // --- Game Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            if (gameStarted && controls.isLocked) {
+                // Handle movement
+                if (moveState.forward) controls.moveForward(moveSpeed * delta);
+                if (moveState.backward) controls.moveForward(-moveSpeed * delta);
+                if (moveState.left) controls.moveRight(-moveSpeed * delta);
+                if (moveState.right) controls.moveRight(moveSpeed * delta);
+                
+                updateEnemies(delta);
+                updateItems(delta);
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // --- Game Logic ---
+        function resetGame() {
+            health = 100;
+            ammo = 30;
+            maxAmmo = 90;
+            kills = 0;
+            wave = 1;
+            gameStarted = true;
+
+            // Clear previous game objects
+            [...enemies, ...ammoBoxes, ...healthPacks].forEach(obj => scene.remove(obj));
+            enemies.length = 0;
+            ammoBoxes.length = 0;
+            healthPacks.length = 0;
+
+            updateHUD();
+        }
+
+        function startWave() {
+            waveUI.textContent = wave;
+            const enemyCount = 2 + wave * 2; // Scaled difficulty
+            for (let i = 0; i < enemyCount; i++) {
+                createEnemy();
+            }
+        }
+
+        function createEnemy() {
+            // Create drone enemy
+            const droneGroup = new THREE.Group();
+            
+            // Drone body
+            const bodyGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x880000,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            droneGroup.add(body);
+            
+            // Drone wings
+            const wingGeometry = new THREE.BoxGeometry(1.5, 0.1, 0.5);
+            const wingMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            
+            const wing1 = new THREE.Mesh(wingGeometry, wingMaterial);
+            wing1.position.set(0, 0, 0.3);
+            wing1.rotation.x = Math.PI / 4;
+            droneGroup.add(wing1);
+            
+            const wing2 = new THREE.Mesh(wingGeometry, wingMaterial);
+            wing2.position.set(0, 0, -0.3);
+            wing2.rotation.x = -Math.PI / 4;
+            droneGroup.add(wing2);
+            
+            // Position drone
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 15 + Math.random() * 10;
+            droneGroup.position.set(
+                Math.cos(angle) * radius,
+                1.5 + Math.random() * 3,
+                Math.sin(angle) * radius
+            );
+            
+            droneGroup.userData = { 
+                health: 30 + wave * 5, 
+                speed: 1 + wave * 0.1 + Math.random() * 0.5,
+                isEnemy: true
+            };
+
+            const neonLight = new THREE.PointLight(0xff0000, 3, 5);
+            droneGroup.add(neonLight);
+            
+            droneGroup.castShadow = true;
+            scene.add(droneGroup);
+            enemies.push(droneGroup);
+        }
+        
+        function updateEnemies(delta) {
+            if (enemies.length === 0 && gameStarted) {
+                wave++;
+                if (wave % 2 === 0) createItem('ammo');
+                if (wave % 3 === 0) createItem('health');
+                startWave();
+                return;
+            }
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                const playerPosition = controls.getObject().position;
+                const direction = new THREE.Vector3().subVectors(playerPosition, enemy.position).normalize();
+                enemy.position.add(direction.multiplyScalar(enemy.userData.speed * delta));
+                enemy.lookAt(playerPosition);
+
+                if (enemy.position.distanceTo(playerPosition) < 2.5) {
+                    takeDamage(15 * delta);
+                }
+            }
+        }
+
+        function createItem(type) {
+           const config = {
+                ammo: { color: 0x00ff00, size: 0.5 },
+                health: { color: 0xff4444, size: 0.5 }
+            }[type];
+            
+            const geometry = new THREE.BoxGeometry(config.size, config.size, config.size);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: config.color,
+                emissive: config.color,
+                emissiveIntensity: 1
+            });
+            const item = new THREE.Mesh(geometry, material);
+            
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 8 + Math.random() * 5;
+            item.position.set(Math.cos(angle) * radius, 0.5, Math.sin(angle) * radius);
+            item.userData = { type, collected: false };
+            const glow = new THREE.PointLight(config.color, 2, 4);
+            item.add(glow);
+
+            scene.add(item);
+            const collection = type === 'ammo' ? ammoBoxes : healthPacks;
+            collection.push(item);
+               
+        }
+
+        function updateItems(delta) {
+            const allItems = [...ammoBoxes, ...healthPacks];
+            const playerPosition = controls.getObject().position;
+
+            for (let i = allItems.length - 1; i >= 0; i--) {
+                const item = allItems[i];
+                item.rotation.y += 0.5 * delta;
+
+                if (!item.userData.collected && item.position.distanceTo(playerPosition) < 2) {
+                    item.userData.collected = true;
+                    if (item.userData.type === 'ammo') {
+                        maxAmmo += 30;
+                        ammo += 30;
+                    } else if (item.userData.type === 'health') {
+                        health = Math.min(100, health + 50);
+                    }
+                    updateHUD();
+                    scene.remove(item);
+                    
+                    // Remove from specific array
+                    const collection = item.userData.type === 'ammo' ? ammoBoxes : healthPacks;
+                    const index = collection.indexOf(item);
+                    if (index > -1) collection.splice(index, 1);
+                }
+            }
+        }
+        
+        // --- Player Actions ---
+        function shoot() {
+            if (isShooting || isReloading) return;
+            if (ammo <= 0) {
+                reload();
+                return;
+            }
+
+            isShooting = true;
+            ammo--;
+            updateHUD();
+
+            // Muzzle flash effect
+            if (weapon && weapon.userData.muzzleFlash) {
+                weapon.userData.muzzleFlash.intensity = 5;
+                setTimeout(() => {
+                    weapon.userData.muzzleFlash.intensity = 0;
+                }, 50);
+            }
+
+            raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+            const intersects = raycaster.intersectObjects(enemies, true);
+
+            if (intersects.length > 0) {
+                let hitObject = intersects[0].object;
+                
+                // Traverse up to find the main enemy group
+                let targetEnemy = null;
+                while (hitObject) {
+                    if (hitObject.userData && hitObject.userData.isEnemy) {
+                        targetEnemy = hitObject;
+                        break;
+                    }
+                    hitObject = hitObject.parent;
+                }
+
+                if (targetEnemy) {
+                    targetEnemy.userData.health -= 15;
+                    if (targetEnemy.userData.health <= 0) {
+                        const index = enemies.indexOf(targetEnemy);
+                        if (index > -1) {
+                            scene.remove(targetEnemy);
+                            enemies.splice(index, 1);
+                            kills++;
+                            updateHUD();
+                        }
+                    }
+                }
+            }
+
+            setTimeout(() => { isShooting = false; }, 150);
+        }
+
+        function reload() {
+            if (isReloading || ammo === maxAmmo) return;
+            
+            isReloading = true;
+            reloadIndicator.style.display = 'block';
+
+            setTimeout(() => {
+                const needed = maxAmmo - ammo;
+                ammo += needed;
+                updateHUD();
+                isReloading = false;
+                reloadIndicator.style.display = 'none';
+            }, 1500);
+        }
+
+        function takeDamage(amount) {
+            health -= amount;
+            if (health < 0) health = 0;
+            updateHUD();
+
+            if (health <= 0) {
+                gameOver();
+            }
+        }
+
+        // --- UI & State Management ---
+        function updateHUD() {
+            healthUI.textContent = Math.floor(health);
+            ammoUI.textContent = ammo;
+            maxAmmoUI.textContent = maxAmmo;
+            killsUI.textContent = kills;
+        }
+
+        function gameOver() {
+            gameStarted = false;
+            controls.unlock();
+            
+            screenTitle.textContent = 'MISSION FAILED';
+            screenStats.textContent = `You survived to Wave ${wave} with ${kills} kills.`;
+            startButton.textContent = 'TRY AGAIN';
+            startScreen.style.display = 'flex';
+        }
+
+        // --- Start ---
+        init();
+    </script>
+</body>
+</html>
