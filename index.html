@@ -10,7 +10,6 @@
             overflow: hidden;
             font-family: 'Arial', sans-serif;
             background: #000;
-            touch-action: none;
         }
         #game-container {
             position: relative;
@@ -26,12 +25,13 @@
             width: 20px;
             height: 20px;
             pointer-events: none;
+            z-index: 10;
         }
         #crosshair::before, #crosshair::after {
             content: '';
             position: absolute;
             background: #00ffff;
-            box-shadow: 0 0 5px #00ffff;
+            box-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
         }
         #crosshair::before {
             width: 2px;
@@ -51,14 +51,37 @@
             font-size: 20px;
             text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
             -webkit-font-smoothing: antialiased;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
         #hud {
             bottom: 20px;
             left: 20px;
+            display: flex;
+            gap: 30px;
+            background: rgba(0, 0, 20, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        .hud-section {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .hud-icon {
+            width: 20px;
+            height: 20px;
         }
         #wave-info {
             top: 20px;
             left: 20px;
+            background: rgba(0, 0, 20, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
         #reload-indicator {
             top: 55%;
@@ -67,6 +90,16 @@
             color: #ff4d4d;
             font-size: 24px;
             display: none;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid #ff4d4d;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
         }
         #start-screen {
             position: absolute;
@@ -88,8 +121,10 @@
             color: #00ffff;
             text-shadow: 0 0 15px #00ffff;
             margin-bottom: 20px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 3px;
         }
-         #start-screen p {
+        #start-screen p {
             font-size: 1.5rem;
             margin-bottom: 40px;
             text-align: center;
@@ -104,6 +139,8 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
         }
         #start-button:hover {
             background: #00ffff;
@@ -117,74 +154,10 @@
             color: white;
             font-size: 16px;
             text-align: right;
-        }
-        
-        /* Mobile Controls */
-        #mobile-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: none;
-            z-index: 10;
-        }
-        .mobile-btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #00ffff;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        #joystick-area {
-            position: absolute;
-            left: 20px;
-            bottom: 100px;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            display: none;
-            z-index: 10;
-        }
-        #joystick {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 255, 255, 0.5);
-            border-radius: 50%;
-            top: 35px;
-            left: 35px;
-            touch-action: manipulation;
-        }
-        #shoot-btn {
-            position: absolute;
-            right: 20px;
-            bottom: 100px;
-        }
-        #reload-btn {
-            position: absolute;
-            right: 20px;
-            bottom: 180px;
-        }
-        #look-toggle {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 80px;
-            height: 80px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #00ffff;
-            border-radius: 50%;
-            display: none;
-            z-index: 10;
-            touch-action: manipulation;
+            background: rgba(0, 0, 20, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00ffff;
         }
         #instructions {
             background: rgba(0, 0, 0, 0.7);
@@ -192,6 +165,7 @@
             border-radius: 10px;
             margin-bottom: 30px;
             max-width: 90%;
+            border: 1px solid #00ffff;
         }
         .instruction-section {
             margin-bottom: 15px;
@@ -200,17 +174,7 @@
             color: #00ffff;
             font-weight: bold;
             margin-bottom: 5px;
-        }
-        @media (max-width: 768px) {
-            #start-screen h1 {
-                font-size: 3rem;
-            }
-            #start-screen p {
-                font-size: 1.2rem;
-            }
-            #controls-info {
-                display: none;
-            }
+            font-size: 1.2rem;
         }
         #mute-btn {
             position: absolute;
@@ -222,58 +186,75 @@
             font-size: 24px;
             cursor: pointer;
             z-index: 200;
+            background: rgba(0, 0, 20, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #00ffff;
+        }
+        #mute-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+        #damage-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="game-container">
         <button id="mute-btn">🔊</button>
+        <div id="damage-overlay"></div>
         <div id="crosshair"></div>
         <div id="hud" class="hud-element">
-            Health: <span id="health">100</span> | 
-            Ammo: <span id="ammo">30</span>/<span id="max-ammo">90</span> | 
-            Kills: <span id="kills">0</span>
+            <div class="hud-section">
+                <span class="hud-icon">❤️</span> <span id="health">100</span>
+            </div>
+            <div class="hud-section">
+                <span class="hud-icon">🔫</span> <span id="ammo">30</span>/<span id="max-ammo">90</span>
+            </div>
+            <div class="hud-section">
+                <span class="hud-icon">💀</span> <span id="kills">0</span>
+            </div>
         </div>
-        <div id="wave-info" class="hud-element">Wave: <span id="wave">1</span></div>
+        <div id="wave-info" class="hud-element">WAVE: <span id="wave">1</span></div>
         <div id="reload-indicator" class="hud-element">RELOADING...</div>
         <div id="controls-info">
-            Move: Arrow Keys/WASD<br>
-            Shoot: Spacebar/Click<br>
-            Reload: R
-        </div>
-
-        <!-- Mobile Controls -->
-        <div id="mobile-controls">
-            <div id="joystick-area">
-                <div id="joystick"></div>
-            </div>
-            <div id="shoot-btn" class="mobile-btn">🔫</div>
-            <div id="reload-btn" class="mobile-btn">🔄</div>
-            <div id="look-toggle"></div>
+            <strong>CONTROLS</strong><br>
+            Move: WASD/Arrow Keys<br>
+            Shoot: Left Click/Spacebar<br>
+            Reload: R<br>
+            Mute: M
         </div>
 
         <div id="start-screen">
             <h1 id="screen-title">NEON STRIKE</h1>
             <div id="instructions">
                 <div class="instruction-section">
-                    <div class="instruction-title">DESKTOP CONTROLS:</div>
+                    <div class="instruction-title">OBJECTIVE</div>
+                    <div>Survive waves of enemy drones in this sci-fi shooter</div>
+                    <div>Collect ammo and health packs to stay alive</div>
+                    <div>Don't let enemies get too close!</div>
+                </div>
+                <div class="instruction-section">
+                    <div class="instruction-title">CONTROLS</div>
                     <div>Move: WASD or Arrow Keys</div>
-                    <div>Shoot: Spacebar or Mouse Click</div>
+                    <div>Shoot: Left Mouse Button or Spacebar</div>
                     <div>Reload: R Key</div>
                     <div>Look: Mouse Movement</div>
-                </div>
-                <div class="instruction-section">
-                    <div class="instruction-title">MOBILE CONTROLS:</div>
-                    <div>Move: Left Joystick</div>
-                    <div>Shoot: Right Fire Button</div>
-                    <div>Reload: Right Reload Button</div>
-                    <div>Look: Touch & Drag (right side)</div>
-                </div>
-                <div class="instruction-section">
-                    <div class="instruction-title">OBJECTIVE:</div>
-                    <div>Survive waves of enemy drones</div>
-                    <div>Collect ammo and health packs</div>
-                    <div>Don't let enemies get too close!</div>
+                    <div>Mute: M Key</div>
                 </div>
             </div>
             <p id="screen-stats"></p>
@@ -285,6 +266,39 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/PointerLockControls.js"></script>
     <script>
+        // Game Constants
+        const GAME = {
+            PLAYER: {
+                HEALTH: 100,
+                AMMO: 30,
+                MAX_AMMO: 90,
+                MOVE_SPEED: 5,
+                RELOAD_TIME: 1500
+            },
+            ENEMY: {
+                BASE_HEALTH: 30,
+                HEALTH_INCREASE: 5,
+                BASE_SPEED: 1,
+                SPEED_INCREASE: 0.1,
+                DAMAGE: 15
+            },
+            WAVE: {
+                ENEMY_INCREASE: 2,
+                AMMO_SPAWN_RATE: 2,
+                HEALTH_SPAWN_RATE: 3
+            },
+            ITEMS: {
+                AMMO_VALUE: 30,
+                HEALTH_VALUE: 50
+            },
+            COLORS: {
+                NEON_BLUE: 0x00ffff,
+                NEON_RED: 0xff0000,
+                NEON_GREEN: 0x00ff00,
+                HEALTH: 0xff4444
+            }
+        };
+
         // --- DOM Elements ---
         const gameContainer = document.getElementById('game-container');
         const startScreen = document.getElementById('start-screen');
@@ -297,13 +311,8 @@
         const reloadIndicator = document.getElementById('reload-indicator');
         const screenTitle = document.getElementById('screen-title');
         const screenStats = document.getElementById('screen-stats');
-        const mobileControls = document.getElementById('mobile-controls');
-        const joystickArea = document.getElementById('joystick-area');
-        const joystick = document.getElementById('joystick');
-        const shootBtn = document.getElementById('shoot-btn');
-        const reloadBtn = document.getElementById('reload-btn');
-        const lookToggle = document.getElementById('look-toggle');
         const muteBtn = document.getElementById('mute-btn');
+        const damageOverlay = document.getElementById('damage-overlay');
 
         // --- Game Core ---
         let scene, camera, renderer, controls, clock;
@@ -312,50 +321,64 @@
         const raycaster = new THREE.Raycaster();
 
         // --- Game State ---
-        let health, ammo, maxAmmo, kills, wave;
-        let isShooting = false, isReloading = false, gameStarted = false;
-        const moveState = { forward: false, backward: false, left: false, right: false };
-        const moveSpeed = 5;
-        
-        // --- Mobile Controls State ---
-        let isMobile = false;
-        let joystickActive = false;
-        let joystickStartX = 0, joystickStartY = 0;
-        let joystickX = 0, joystickY = 0;
-        let lookActive = false;
-        let lookStartX = 0, lookStartY = 0;
-        let lookX = 0, lookY = 0;
-        let prevTouchX = 0, prevTouchY = 0;
-        
+        let gameState = {
+            health: GAME.PLAYER.HEALTH,
+            ammo: GAME.PLAYER.AMMO,
+            maxAmmo: GAME.PLAYER.MAX_AMMO,
+            kills: 0,
+            wave: 1,
+            isShooting: false,
+            isReloading: false,
+            gameStarted: false,
+            isMuted: false,
+            moveState: {
+                forward: false,
+                backward: false,
+                left: false,
+                right: false
+            }
+        };
+
         // --- Audio ---
         let backgroundMusic, gunShotSound, reloadSound, enemyDeathSound;
-        let isMuted = false;
         const audioListener = new THREE.AudioListener();
         const audioLoader = new THREE.AudioLoader();
         
         // --- Initialization ---
         function init() {
-            // Check if mobile
-            isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            initScene();
+            initCamera();
+            initRenderer();
+            initLights();
+            initFloor();
+            initEventListeners();
+            loadSounds();
             
-            // Scene setup
+            // Start game loop
+            animate();
+        }
+
+        function initScene() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x00001a);
             scene.fog = new THREE.Fog(0x00001a, 15, 40);
+        }
 
-            // Camera setup
+        function initCamera() {
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.y = 1.6;
             camera.add(audioListener);
+        }
 
-            // Renderer setup
+        function initRenderer() {
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             renderer.setPixelRatio(window.devicePixelRatio);
             gameContainer.appendChild(renderer.domElement);
+        }
 
-            // Lighting
+        function initLights() {
             const ambientLight = new THREE.AmbientLight(0x404040, 2);
             scene.add(ambientLight);
 
@@ -363,8 +386,9 @@
             directionalLight.position.set(10, 20, 5);
             directionalLight.castShadow = true;
             scene.add(directionalLight);
-            
-            // Floor
+        }
+
+        function initFloor() {
             const floorGeometry = new THREE.PlaneGeometry(100, 100);
             const floorMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x08081a, 
@@ -376,28 +400,6 @@
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
             scene.add(floor);
-
-            // Create environment
-            createEnvironment();
-
-            // Create weapon
-            createWeapon();
-
-            // Load sounds
-            loadSounds();
-
-            // Controls
-            controls = new THREE.PointerLockControls(camera, document.body);
-            scene.add(controls.getObject());
-
-            // Clock
-            clock = new THREE.Clock();
-
-            // Event Listeners
-            setupEventListeners();
-            
-            // Start game loop
-            animate();
         }
 
         function loadSounds() {
@@ -407,8 +409,6 @@
                 backgroundMusic.setBuffer(buffer);
                 backgroundMusic.setLoop(true);
                 backgroundMusic.setVolume(0.3);
-            }, undefined, (error) => {
-                console.error('Error loading background music:', error);
             });
 
             // Gunshot sound
@@ -434,25 +434,17 @@
         }
 
         function toggleMute() {
-            isMuted = !isMuted;
-            muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            gameState.isMuted = !gameState.isMuted;
+            muteBtn.textContent = gameState.isMuted ? '🔇' : '🔊';
             
-            if (backgroundMusic) {
-                backgroundMusic.setVolume(isMuted ? 0 : 0.3);
-            }
-            if (gunShotSound) {
-                gunShotSound.setVolume(isMuted ? 0 : 0.5);
-            }
-            if (reloadSound) {
-                reloadSound.setVolume(isMuted ? 0 : 0.5);
-            }
-            if (enemyDeathSound) {
-                enemyDeathSound.setVolume(isMuted ? 0 : 0.5);
-            }
+            const volume = gameState.isMuted ? 0 : 0.3;
+            if (backgroundMusic) backgroundMusic.setVolume(volume);
+            if (gunShotSound) gunShotSound.setVolume(gameState.isMuted ? 0 : 0.5);
+            if (reloadSound) reloadSound.setVolume(gameState.isMuted ? 0 : 0.5);
+            if (enemyDeathSound) enemyDeathSound.setVolume(gameState.isMuted ? 0 : 0.5);
         }
 
         function createEnvironment() {
-            // Create sci-fi corridor walls
             const loader = new THREE.GLTFLoader();
             loader.load('sci-fi_corridor.glb', (gltf) => {
                 const env = gltf.scene;
@@ -462,66 +454,59 @@
         }
 
         function createWeapon() {
-            // Create a simple rifle model
             const loader = new THREE.GLTFLoader();
             loader.load('9mm_pistol.glb', (gltf) => {
                 weapon = gltf.scene;
-                // Position and scale the weapon
                 weapon.position.set(0.5, -0.5, -1);
                 weapon.rotation.y = 3*Math.PI/2;
                 weapon.scale.set(0.5, 0.5, 0.5);
                 camera.add(weapon);
+                
+                // Add muzzle flash
+                const muzzleFlash = new THREE.PointLight(GAME.COLORS.NEON_BLUE, 0, 0.5);
+                muzzleFlash.position.set(0, 0, -0.5);
+                weapon.add(muzzleFlash);
+                weapon.userData.muzzleFlash = muzzleFlash;
             });
         }
 
-        function setupEventListeners() {
-            startButton.addEventListener('click', () => {
-                startScreen.style.display = 'none';
-                if (isMobile) {
-                    setupMobileControls();
-                } else {
-                    controls.lock();
-                }
-                
-                // Start music when game starts
-                if (backgroundMusic && !isMuted) {
-                    backgroundMusic.play();
-                }
-            });
-
+        function initEventListeners() {
+            startButton.addEventListener('click', startGame);
             muteBtn.addEventListener('click', toggleMute);
 
+            // Pointer lock controls
+            controls = new THREE.PointerLockControls(camera, document.body);
+            scene.add(controls.getObject());
+
             controls.addEventListener('lock', () => {
-                if (!gameStarted) {
+                if (!gameState.gameStarted) {
                     resetGame();
-                    gameStarted = true;
+                    gameState.gameStarted = true;
                     startWave();
                 }
             });
 
-            // Spacebar for shooting
+            // Keyboard controls
             document.addEventListener('keydown', (event) => {
-                if (event.code === 'Space' && controls.isLocked && gameStarted) {
-                    shoot();
-                }
-                
-                // Movement keys
                 switch(event.code) {
+                    case 'Space':
+                        if (controls.isLocked) shoot();
+                        break;
                     case 'ArrowUp':
                     case 'KeyW':
-                        moveState.forward = true;
+                        gameState.moveState.forward = true;
                         break;
                     case 'ArrowDown':
                     case 'KeyS':
-                        moveState.backward = true;
+                        gameState.moveState.backward = true;
                         break;
                     case 'ArrowLeft':
                     case 'KeyA':
-                        moveState.left = true;
+                        gameState.moveState.left = true;
                         break;
                     case 'ArrowRight':
                     case 'KeyD':
-                        moveState.right = true;
+                        gameState.moveState.right = true;
                         break;
                     case 'KeyR':
                         if (controls.isLocked) reload();
@@ -536,26 +521,26 @@
                 switch(event.code) {
                     case 'ArrowUp':
                     case 'KeyW':
-                        moveState.forward = false;
+                        gameState.moveState.forward = false;
                         break;
                     case 'ArrowDown':
                     case 'KeyS':
-                        moveState.backward = false;
+                        gameState.moveState.backward = false;
                         break;
                     case 'ArrowLeft':
                     case 'KeyA':
-                        moveState.left = false;
+                        gameState.moveState.left = false;
                         break;
                     case 'ArrowRight':
                     case 'KeyD':
-                        moveState.right = false;
+                        gameState.moveState.right = false;
                         break;
                 }
             });
 
-            // Click to shoot (for desktop)
+            // Mouse click to shoot
             gameContainer.addEventListener('click', () => {
-                if (gameStarted && !isMobile && controls.isLocked) {
+                if (gameState.gameStarted && controls.isLocked) {
                     shoot();
                 }
             });
@@ -566,127 +551,31 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
         }
-        
-        function setupMobileControls() {
-            mobileControls.style.display = 'block';
-            joystickArea.style.display = 'block';
-            lookToggle.style.display = 'block';
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            controls.lock();
             
-            // Joystick for movement
-            joystickArea.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                joystickActive = true;
-                const touch = e.touches[0];
-                const rect = joystickArea.getBoundingClientRect();
-                joystickStartX = rect.left + rect.width / 2;
-                joystickStartY = rect.top + rect.height / 2;
-                updateJoystick(touch.clientX, touch.clientY);
-            });
-            
-            document.addEventListener('touchmove', (e) => {
-                if (joystickActive) {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    updateJoystick(touch.clientX, touch.clientY);
-                }
-                
-                if (lookActive) {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    const deltaX = touch.clientX - prevTouchX;
-                    const deltaY = touch.clientY - prevTouchY;
-                    prevTouchX = touch.clientX;
-                    prevTouchY = touch.clientY;
-                    
-                    // Adjust sensitivity
-                    const sensitivity = 0.002;
-                    controls.getObject().rotation.y -= deltaX * sensitivity;
-                    camera.rotation.x -= deltaY * sensitivity;
-                    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
-                }
-            });
-            
-            document.addEventListener('touchend', (e) => {
-                if (joystickActive) {
-                    joystickActive = false;
-                    joystick.style.transform = 'translate(35px, 35px)';
-                    moveState.forward = false;
-                    moveState.backward = false;
-                    moveState.left = false;
-                    moveState.right = false;
-                }
-                
-                if (lookActive) {
-                    lookActive = false;
-                }
-            });
-            
-            // Look controls (right side of screen)
-            lookToggle.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                lookActive = true;
-                const touch = e.touches[0];
-                prevTouchX = touch.clientX;
-                prevTouchY = touch.clientY;
-            });
-            
-            // Shoot button
-            shootBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (gameStarted) shoot();
-            });
-            
-            // Reload button
-            reloadBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (gameStarted) reload();
-            });
-            
-            // Start game for mobile
-            if (!gameStarted) {
-                resetGame();
-                gameStarted = true;
-                startWave();
-            }
-        }
-        
-        function updateJoystick(touchX, touchY) {
-            const dx = touchX - joystickStartX;
-            const dy = touchY - joystickStartY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const maxDistance = 60;
-            
-            if (distance > maxDistance) {
-                const angle = Math.atan2(dy, dx);
-                joystickX = Math.cos(angle) * maxDistance;
-                joystickY = Math.sin(angle) * maxDistance;
-            } else {
-                joystickX = dx;
-                joystickY = dy;
+            // Start music when game starts
+            if (backgroundMusic && !gameState.isMuted) {
+                backgroundMusic.play();
             }
             
-            joystick.style.transform = `translate(${joystickX + 35}px, ${joystickY + 35}px)`;
+            // Create environment and weapon
+            createEnvironment();
+            createWeapon();
             
-            // Update movement state based on joystick position
-            const deadZone = 15;
-            moveState.forward = joystickY < -deadZone;
-            moveState.backward = joystickY > deadZone;
-            moveState.left = joystickX < -deadZone;
-            moveState.right = joystickX > deadZone;
+            // Initialize clock
+            clock = new THREE.Clock();
         }
-        
+
         // --- Game Loop ---
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
 
-            if (gameStarted && (controls.isLocked || isMobile)) {
-                // Handle movement
-                if (moveState.forward) controls.moveForward(moveSpeed * delta);
-                if (moveState.backward) controls.moveForward(-moveSpeed * delta);
-                if (moveState.left) controls.moveRight(-moveSpeed * delta);
-                if (moveState.right) controls.moveRight(moveSpeed * delta);
-                
+            if (gameState.gameStarted && controls.isLocked) {
+                handleMovement(delta);
                 updateEnemies(delta);
                 updateItems(delta);
             }
@@ -694,14 +583,32 @@
             renderer.render(scene, camera);
         }
 
+        function handleMovement(delta) {
+            if (gameState.moveState.forward) controls.moveForward(GAME.PLAYER.MOVE_SPEED * delta);
+            if (gameState.moveState.backward) controls.moveForward(-GAME.PLAYER.MOVE_SPEED * delta);
+            if (gameState.moveState.left) controls.moveRight(-GAME.PLAYER.MOVE_SPEED * delta);
+            if (gameState.moveState.right) controls.moveRight(GAME.PLAYER.MOVE_SPEED * delta);
+        }
+
         // --- Game Logic ---
         function resetGame() {
-            health = 100;
-            ammo = 30;
-            maxAmmo = 90;
-            kills = 0;
-            wave = 1;
-            gameStarted = true;
+            gameState = {
+                health: GAME.PLAYER.HEALTH,
+                ammo: GAME.PLAYER.AMMO,
+                maxAmmo: GAME.PLAYER.MAX_AMMO,
+                kills: 0,
+                wave: 1,
+                isShooting: false,
+                isReloading: false,
+                gameStarted: true,
+                isMuted: gameState.isMuted,
+                moveState: {
+                    forward: false,
+                    backward: false,
+                    left: false,
+                    right: false
+                }
+            };
 
             // Clear previous game objects
             [...enemies, ...ammoBoxes, ...healthPacks].forEach(obj => scene.remove(obj));
@@ -710,18 +617,18 @@
             healthPacks.length = 0;
 
             updateHUD();
+            damageOverlay.style.opacity = 0;
         }
 
         function startWave() {
-            waveUI.textContent = wave;
-            const enemyCount = 2 + wave * 2; // Scaled difficulty
+            waveUI.textContent = gameState.wave;
+            const enemyCount = GAME.WAVE.ENEMY_INCREASE + gameState.wave * 2;
             for (let i = 0; i < enemyCount; i++) {
                 createEnemy();
             }
         }
 
         function createEnemy() {
-            // Create drone enemy
             const droneGroup = new THREE.Group();
             
             // Drone body
@@ -758,12 +665,12 @@
             );
             
             droneGroup.userData = { 
-                health: 30 + wave * 5, 
-                speed: 1 + wave * 0.1 + Math.random() * 0.5,
+                health: GAME.ENEMY.BASE_HEALTH + gameState.wave * GAME.ENEMY.HEALTH_INCREASE, 
+                speed: GAME.ENEMY.BASE_SPEED + gameState.wave * GAME.ENEMY.SPEED_INCREASE + Math.random() * 0.5,
                 isEnemy: true
             };
 
-            const neonLight = new THREE.PointLight(0xff0000, 3, 5);
+            const neonLight = new THREE.PointLight(GAME.COLORS.NEON_RED, 3, 5);
             droneGroup.add(neonLight);
             
             droneGroup.castShadow = true;
@@ -772,10 +679,10 @@
         }
         
         function updateEnemies(delta) {
-            if (enemies.length === 0 && gameStarted) {
-                wave++;
-                if (wave % 2 === 0) createItem('ammo');
-                if (wave % 3 === 0) createItem('health');
+            if (enemies.length === 0 && gameState.gameStarted) {
+                gameState.wave++;
+                if (gameState.wave % GAME.WAVE.AMMO_SPAWN_RATE === 0) createItem('ammo');
+                if (gameState.wave % GAME.WAVE.HEALTH_SPAWN_RATE === 0) createItem('health');
                 startWave();
                 return;
             }
@@ -788,15 +695,21 @@
                 enemy.lookAt(playerPosition);
 
                 if (enemy.position.distanceTo(playerPosition) < 2.5) {
-                    takeDamage(15 * delta);
+                    takeDamage(GAME.ENEMY.DAMAGE * delta);
                 }
             }
         }
 
         function createItem(type) {
-           const config = {
-                ammo: { color: 0x00ff00, size: 0.5 },
-                health: { color: 0xff4444, size: 0.5 }
+            const config = {
+                ammo: { 
+                    color: GAME.COLORS.NEON_GREEN, 
+                    size: 0.5 
+                },
+                health: { 
+                    color: GAME.COLORS.HEALTH, 
+                    size: 0.5 
+                }
             }[type];
             
             const geometry = new THREE.BoxGeometry(config.size, config.size, config.size);
@@ -817,7 +730,6 @@
             scene.add(item);
             const collection = type === 'ammo' ? ammoBoxes : healthPacks;
             collection.push(item);
-               
         }
 
         function updateItems(delta) {
@@ -831,10 +743,10 @@
                 if (!item.userData.collected && item.position.distanceTo(playerPosition) < 2) {
                     item.userData.collected = true;
                     if (item.userData.type === 'ammo') {
-                        maxAmmo += 30;
-                        ammo += 30;
+                        gameState.maxAmmo += GAME.ITEMS.AMMO_VALUE;
+                        gameState.ammo += GAME.ITEMS.AMMO_VALUE;
                     } else if (item.userData.type === 'health') {
-                        health = Math.min(100, health + 50);
+                        gameState.health = Math.min(GAME.PLAYER.HEALTH, gameState.health + GAME.ITEMS.HEALTH_VALUE);
                     }
                     updateHUD();
                     scene.remove(item);
@@ -849,18 +761,18 @@
         
         // --- Player Actions ---
         function shoot() {
-            if (isShooting || isReloading) return;
-            if (ammo <= 0) {
+            if (gameState.isShooting || gameState.isReloading) return;
+            if (gameState.ammo <= 0) {
                 reload();
                 return;
             }
 
-            isShooting = true;
-            ammo--;
+            gameState.isShooting = true;
+            gameState.ammo--;
             updateHUD();
 
             // Play gunshot sound
-            if (gunShotSound && !isMuted) {
+            if (gunShotSound && !gameState.isMuted) {
                 gunShotSound.play();
             }
 
@@ -895,11 +807,11 @@
                         if (index > -1) {
                             scene.remove(targetEnemy);
                             enemies.splice(index, 1);
-                            kills++;
+                            gameState.kills++;
                             updateHUD();
                             
                             // Play enemy death sound
-                            if (enemyDeathSound && !isMuted) {
+                            if (enemyDeathSound && !gameState.isMuted) {
                                 enemyDeathSound.play();
                             }
                         }
@@ -907,49 +819,56 @@
                 }
             }
 
-            setTimeout(() => { isShooting = false; }, 150);
+            setTimeout(() => { gameState.isShooting = false; }, 150);
         }
 
         function reload() {
-            if (isReloading || ammo === maxAmmo) return;
+            if (gameState.isReloading || gameState.ammo === gameState.maxAmmo) return;
             
-            isReloading = true;
+            gameState.isReloading = true;
             reloadIndicator.style.display = 'block';
 
             // Play reload sound
-            if (reloadSound && !isMuted) {
+            if (reloadSound && !gameState.isMuted) {
                 reloadSound.play();
             }
 
             setTimeout(() => {
-                const needed = maxAmmo - ammo;
-                ammo += needed;
+                const needed = gameState.maxAmmo - gameState.ammo;
+                gameState.ammo += needed;
                 updateHUD();
-                isReloading = false;
+                gameState.isReloading = false;
                 reloadIndicator.style.display = 'none';
-            }, 1500);
+            }, GAME.PLAYER.RELOAD_TIME);
         }
 
         function takeDamage(amount) {
-            health -= amount;
-            if (health < 0) health = 0;
+            gameState.health -= amount;
+            if (gameState.health < 0) gameState.health = 0;
             updateHUD();
 
-            if (health <= 0) {
+            // Show damage overlay
+            damageOverlay.style.opacity = 0.5;
+            setTimeout(() => {
+                damageOverlay.style.opacity = 0;
+            }, 200);
+
+            if (gameState.health <= 0) {
                 gameOver();
             }
         }
 
         // --- UI & State Management ---
         function updateHUD() {
-            healthUI.textContent = Math.floor(health);
-            ammoUI.textContent = ammo;
-            maxAmmoUI.textContent = maxAmmo;
-            killsUI.textContent = kills;
+            healthUI.textContent = Math.floor(gameState.health);
+            ammoUI.textContent = gameState.ammo;
+            maxAmmoUI.textContent = gameState.maxAmmo;
+            killsUI.textContent = gameState.kills;
+            waveUI.textContent = gameState.wave;
         }
 
         function gameOver() {
-            gameStarted = false;
+            gameState.gameStarted = false;
             controls.unlock();
             
             // Stop background music
@@ -958,16 +877,9 @@
             }
             
             screenTitle.textContent = 'MISSION FAILED';
-            screenStats.textContent = `You survived to Wave ${wave} with ${kills} kills.`;
+            screenStats.textContent = `You survived to Wave ${gameState.wave} with ${gameState.kills} kills.`;
             startButton.textContent = 'TRY AGAIN';
             startScreen.style.display = 'flex';
-            
-            // Hide mobile controls on game over
-            if (isMobile) {
-                mobileControls.style.display = 'none';
-                joystickArea.style.display = 'none';
-                lookToggle.style.display = 'none';
-            }
         }
 
         // --- Start ---
